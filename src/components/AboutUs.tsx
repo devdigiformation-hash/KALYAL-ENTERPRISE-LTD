@@ -77,11 +77,11 @@ export const AboutUs: React.FC = () => {
           <div className="lg:col-span-5">
             <div className="relative glass-panel p-6 sm:p-8 rounded-3xl border border-white/10 shadow-2xl">
               
-              <div className="flex items-center justify-center p-6 bg-slate-900/60 rounded-2xl border border-white/5 mb-6">
+              <div className="flex items-center justify-center p-6 bg-slate-900/60 rounded-3xl border border-white/5 mb-6">
                 <img 
                   src="/brand/hero-badge.png" 
                   alt="KALYAL ENTERPRISE LTD Emblem" 
-                  className="w-full max-w-xs object-contain drop-shadow-xl"
+                  className="w-full max-w-xs object-contain drop-shadow-xl rounded-2xl overflow-hidden"
                 />
               </div>
 

@@ -23,7 +23,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenQuote, onOpenPrivacy }) =>
               <img 
                 src="/brand/logo.png" 
                 alt="KALYAL ENTERPRISE LTD" 
-                className="h-10 w-auto object-contain"
+                className="h-10 w-auto object-contain rounded-xl overflow-hidden shadow-md"
               />
             </a>
             <p className="text-slate-400 text-xs leading-relaxed max-w-sm">

@@ -17,3 +17,5 @@ brand_*.png
 Thumbs.db
 .idea/
 .vscode/
+
+.vercel
