@@ -77,7 +77,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenQuote }) => {
             <img 
               src="/brand/logo.png" 
               alt="KALYAL ENTERPRISE LTD - Freight Transport By Road" 
-              className="h-10 sm:h-12 w-auto object-contain rounded-xl overflow-hidden shadow-md transition-transform group-hover:scale-[1.02]"
+              className="h-11 sm:h-13 w-auto object-contain rounded-xl overflow-hidden shadow-md transition-transform group-hover:scale-[1.02]"
             />
           </a>
 
