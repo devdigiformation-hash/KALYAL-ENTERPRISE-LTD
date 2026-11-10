@@ -1,0 +1,19 @@
+# Node modules & build
+node_modules/
+dist/
+dist-ssr/
+.vercel/
+
+# Logs
+*.log
+
+# Heavy raw media inputs (preserved on local disk)
+*.mp4
+*.zip
+brand_*.png
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
