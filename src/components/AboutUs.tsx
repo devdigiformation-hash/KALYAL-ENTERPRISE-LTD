@@ -81,7 +81,7 @@ export const AboutUs: React.FC = () => {
                 <img 
                   src="/brand/hero-badge.png" 
                   alt="KALYAL ENTERPRISE LTD Emblem" 
-                  className="w-full max-w-xs object-contain drop-shadow-xl rounded-2xl overflow-hidden"
+                  className="w-full max-w-xs object-contain drop-shadow-xl rounded-2xl overflow-hidden border border-white/10 bg-[#00186B]"
                 />
               </div>
 

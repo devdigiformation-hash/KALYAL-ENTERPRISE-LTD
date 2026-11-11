@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Phone, Mail, Menu, X, ArrowRight, ShieldCheck } from 'lucide-react';
 
 interface HeaderProps {
@@ -8,6 +8,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onOpenQuote }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,6 +16,19 @@ export const Header: React.FC<HeaderProps> = ({ onOpenQuote }) => {
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Dynamically measure and broadcast real header height for pinned animation stages
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      if (headerRef.current) {
+        const height = headerRef.current.offsetHeight;
+        document.documentElement.style.setProperty('--header-height', `${height}px`);
+      }
+    };
+    updateHeaderHeight();
+    window.addEventListener('resize', updateHeaderHeight);
+    return () => window.removeEventListener('resize', updateHeaderHeight);
   }, []);
 
   const navLinks = [
@@ -63,21 +77,22 @@ export const Header: React.FC<HeaderProps> = ({ onOpenQuote }) => {
 
       {/* Main Sticky Header */}
       <header 
+        ref={headerRef}
         id="site-header"
         className={`sticky top-0 z-50 transition-all duration-300 ${
           isScrolled 
-            ? 'bg-kalyal-dark/95 backdrop-blur-md shadow-lg shadow-black/40 border-b border-white/10 py-3' 
-            : 'bg-kalyal-dark/80 backdrop-blur-sm border-b border-white/5 py-4'
+            ? 'bg-kalyal-dark/95 backdrop-blur-md shadow-lg shadow-black/40 border-b border-white/10 py-2' 
+            : 'bg-kalyal-dark/85 backdrop-blur-sm border-b border-white/5 py-2.5 sm:py-3'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
           
-          {/* Top-Left Approved Brand Logo ONLY (Strict Rule: No duplicate next to hero heading) */}
-          <a href="#hero" className="flex items-center group focus:outline-none">
+          {/* Top-Left Approved Full-Resolution Brand Logo ONLY (Strict Rule: No duplicate next to hero heading) */}
+          <a href="#hero" className="flex items-center group focus:outline-none shrink-0" aria-label="KALYAL ENTERPRISE LTD Home">
             <img 
               src="/brand/logo.png" 
               alt="KALYAL ENTERPRISE LTD - Freight Transport By Road" 
-              className="h-11 sm:h-13 w-auto object-contain rounded-xl overflow-hidden shadow-md transition-transform group-hover:scale-[1.02]"
+              className="h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 object-contain rounded-2xl overflow-hidden shadow-xl border border-white/10 transition-transform group-hover:scale-[1.02] shrink-0 bg-[#00186B]"
             />
           </a>
 
@@ -96,7 +111,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenQuote }) => {
           </nav>
 
           {/* Action CTAs */}
-          <div className="hidden sm:flex items-center space-x-3">
+          <div className="hidden sm:flex items-center space-x-3 shrink-0">
             <a 
               href="tel:+447746645195" 
               className="px-3.5 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 rounded-lg border border-slate-700 transition-all flex items-center gap-2"

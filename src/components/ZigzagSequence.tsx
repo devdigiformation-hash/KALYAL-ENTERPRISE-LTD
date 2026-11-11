@@ -1,11 +1,9 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { useImageSequence } from '../hooks/useImageSequence';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 
 interface ZigzagSequenceProps {
   id: string;
-  stageNumber: string;
-  stageTitle: string;
   badge: string;
   headline: string;
   highlightText: string;
@@ -22,8 +20,6 @@ interface ZigzagSequenceProps {
 
 export const ZigzagSequence: React.FC<ZigzagSequenceProps> = ({
   id,
-  stageNumber,
-  stageTitle,
   badge,
   headline,
   highlightText,
@@ -39,8 +35,7 @@ export const ZigzagSequence: React.FC<ZigzagSequenceProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [currentFrameIndex, setCurrentFrameIndex] = useState(0);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const activeFrameRef = useRef(0);
 
   const { images, posterUrl } = useImageSequence({
     folder,
@@ -94,7 +89,7 @@ export const ZigzagSequence: React.FC<ZigzagSequenceProps> = ({
     ctx.restore();
   }, [images]);
 
-  // Scroll listener for pinned stage
+  // Scroll listener for center-pinned stage (pure internal animation calculations)
   useEffect(() => {
     let animationFrameId: number;
 
@@ -111,15 +106,15 @@ export const ZigzagSequence: React.FC<ZigzagSequenceProps> = ({
       const rawProgress = -rect.top / scrollableDistance;
       const clampedProgress = Math.max(0, Math.min(1, rawProgress));
 
-      setScrollProgress(clampedProgress);
-
       const targetFrame = Math.min(
         Math.round(clampedProgress * (frameCount - 1)),
         frameCount - 1
       );
 
-      setCurrentFrameIndex(targetFrame);
-      animationFrameId = requestAnimationFrame(() => renderFrame(targetFrame));
+      if (targetFrame !== activeFrameRef.current) {
+        activeFrameRef.current = targetFrame;
+        animationFrameId = requestAnimationFrame(() => renderFrame(targetFrame));
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -140,7 +135,7 @@ export const ZigzagSequence: React.FC<ZigzagSequenceProps> = ({
     }
   }, [images, renderFrame]);
 
-  // Visual element JSX
+  // Clean visual element JSX — zero technical debug badges, pure cinematic footage
   const visualElement = (
     <div className="w-full relative group">
       
@@ -149,7 +144,7 @@ export const ZigzagSequence: React.FC<ZigzagSequenceProps> = ({
         <canvas 
           ref={canvasRef} 
           className="w-full h-full object-cover block"
-          aria-label={`${headline} - scroll driven sequence`}
+          aria-label={`${headline} - freight transit animation`}
         />
 
         {/* Fallback */}
@@ -161,25 +156,8 @@ export const ZigzagSequence: React.FC<ZigzagSequenceProps> = ({
           />
         </noscript>
 
-        {/* Subtle cinematic overlays */}
-        <div className="absolute inset-0 bg-gradient-to-t from-kalyal-darker/70 via-transparent to-transparent pointer-events-none" />
-
-        {/* Interactive Scrub Info Badge on the Canvas */}
-        <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 glass-panel px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl flex items-center gap-2.5 text-[11px] sm:text-xs">
-          <div className="w-2 h-2 rounded-full bg-kalyal-gold animate-ping" />
-          <span className="text-slate-300 font-medium">
-            Frame {currentFrameIndex + 1}/{frameCount}
-          </span>
-          <span className="text-slate-500">|</span>
-          <span className="text-amber-400 font-semibold">
-            {Math.round(scrollProgress * 100)}% Scrubbed
-          </span>
-        </div>
-
-        {/* Subtle stage watermark */}
-        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-kalyal-dark/70 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-[10px] font-bold text-slate-300 uppercase tracking-widest">
-          {stageTitle}
-        </div>
+        {/* Subtle cinematic vignette */}
+        <div className="absolute inset-0 bg-gradient-to-t from-kalyal-darker/60 via-transparent to-transparent pointer-events-none" />
       </div>
 
       {/* Background ambient lighting accent */}
@@ -191,11 +169,8 @@ export const ZigzagSequence: React.FC<ZigzagSequenceProps> = ({
   const contentElement = (
     <div className="space-y-4 sm:space-y-6">
       
-      {/* Stage Number & Category Badge */}
-      <div className="inline-flex items-center gap-2.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/80 text-amber-300 text-xs font-semibold">
-        <span className="w-5 h-5 rounded-full bg-kalyal-gold text-kalyal-darker flex items-center justify-center font-bold text-[11px]">
-          {stageNumber}
-        </span>
+      {/* Editorial Category Badge */}
+      <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-800/80 border border-slate-700/80 text-amber-300 text-xs font-semibold">
         <span>{badge}</span>
       </div>
 
@@ -250,8 +225,8 @@ export const ZigzagSequence: React.FC<ZigzagSequenceProps> = ({
       className="relative w-full bg-kalyal-darker border-t border-white/5"
       style={{ height: '200vh' }} // Generous scrub distance for center-pinned playback
     >
-      {/* Sticky centered viewport stage */}
-      <div className="sticky top-[58px] sm:top-[74px] h-[calc(100svh-58px)] sm:h-[calc(100svh-74px)] w-full flex items-center justify-center overflow-hidden py-4 sm:py-8">
+      {/* Sticky centered viewport stage pinned safely below header */}
+      <div className="sticky top-[var(--header-height,80px)] h-[calc(100svh-var(--header-height,80px))] w-full flex items-center justify-center overflow-hidden py-4 sm:py-8">
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">

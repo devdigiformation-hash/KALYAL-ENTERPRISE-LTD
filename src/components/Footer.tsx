@@ -23,7 +23,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenQuote, onOpenPrivacy }) =>
               <img 
                 src="/brand/logo.png" 
                 alt="KALYAL ENTERPRISE LTD" 
-                className="h-12 sm:h-14 w-auto object-contain rounded-xl overflow-hidden shadow-md"
+                className="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-2xl overflow-hidden shadow-lg border border-white/10 bg-[#00186B]"
               />
             </a>
             <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
@@ -39,7 +39,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenQuote, onOpenPrivacy }) =>
           <div className="space-y-3">
             <h4 className="text-sm font-bold text-white uppercase tracking-wider">Navigation</h4>
             <ul className="space-y-2">
-              <li><a href="#hero" className="hover:text-kalyal-gold transition-colors">Home Stage</a></li>
+              <li><a href="#hero" className="hover:text-kalyal-gold transition-colors">Home</a></li>
               <li><a href="#journey" className="hover:text-kalyal-gold transition-colors">Road Journey</a></li>
               <li><a href="#unloading" className="hover:text-kalyal-gold transition-colors">Warehouse Unloading</a></li>
               <li><a href="#services" className="hover:text-kalyal-gold transition-colors">Services</a></li>

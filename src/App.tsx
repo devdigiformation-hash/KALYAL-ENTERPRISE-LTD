@@ -30,8 +30,6 @@ export const App: React.FC = () => {
         {/* SECTION 02: Zigzag 1 — UK Road Freight Journey (CLIP_02, 45 frames, Visual Right) */}
         <ZigzagSequence
           id="journey"
-          stageNumber="02"
-          stageTitle="Road Journey"
           badge="UK Motorway Corridor"
           headline="Freight Moving Across"
           highlightText="the UK Road Network."
@@ -56,8 +54,6 @@ export const App: React.FC = () => {
         {/* SECTION 03: Zigzag 2 — Warehouse Unloading & Handover (CLIP_03, 31 frames, Visual Left) */}
         <ZigzagSequence
           id="unloading"
-          stageNumber="03"
-          stageTitle="Warehouse Delivery"
           badge="Delivery & Unloading"
           headline="From Arrival to"
           highlightText="Precise Warehouse Handover."
@@ -79,8 +75,6 @@ export const App: React.FC = () => {
         {/* SECTION 04: Zigzag 3 — Careers & Commercial Recruitment (CLIP_04, 31 frames, Visual Right) */}
         <ZigzagSequence
           id="careers-preview"
-          stageNumber="04"
-          stageTitle="Commercial Operations"
           badge="Careers & Expansion"
           headline="Build Your Career With"
           highlightText="KALYAL ENTERPRISE LTD."
