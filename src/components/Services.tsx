@@ -45,9 +45,9 @@ export const Services: React.FC<ServicesProps> = ({ onOpenQuote }) => {
     {
       icon: ShieldCheck,
       title: 'Dedicated Contract Logistics',
-      tag: 'Tailored Fleets',
+      tag: 'Dedicated Transport',
       description: 'Bespoke road haulage partnerships for commercial enterprises requiring regular recurring transport capacity and accountable reporting.',
-      benefits: ['Dedicated driver planning', 'Transparent service reviews', 'Long-term rate stability'],
+      benefits: ['Dedicated transport planning', 'Transparent service reviews', 'Long-term rate stability'],
     },
   ];
 

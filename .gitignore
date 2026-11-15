@@ -4,6 +4,9 @@ dist/
 dist-ssr/
 .vercel/
 
+# Archive backups
+archive/
+
 # Logs
 *.log
 

@@ -16,6 +16,7 @@ interface ZigzagSequenceProps {
   layout: 'visual-right' | 'visual-left';
   folder: string;
   frameCount: number;
+  interimImageUrl?: string;
 }
 
 export const ZigzagSequence: React.FC<ZigzagSequenceProps> = ({

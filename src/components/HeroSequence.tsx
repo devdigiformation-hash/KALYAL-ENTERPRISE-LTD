@@ -13,7 +13,7 @@ export const HeroSequence: React.FC<HeroSequenceProps> = ({ onOpenQuote }) => {
 
   const { images, posterUrl } = useImageSequence({
     folder: 'clip-01',
-    frameCount: 42,
+    frameCount: 38,
     posterUrl: '/posters/clip-01.jpg',
   });
 
@@ -100,8 +100,8 @@ export const HeroSequence: React.FC<HeroSequenceProps> = ({ onOpenQuote }) => {
       const clampedProgress = Math.max(0, Math.min(1, rawProgress));
 
       const targetFrame = Math.min(
-        Math.round(clampedProgress * 41),
-        41
+        Math.round(clampedProgress * 37),
+        37
       );
 
       if (targetFrame !== activeFrameRef.current) {
@@ -170,36 +170,43 @@ export const HeroSequence: React.FC<HeroSequenceProps> = ({ onOpenQuote }) => {
             {/* Trust badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-kalyal-navy/80 border border-kalyal-gold/40 text-amber-300 text-xs font-semibold mb-4 backdrop-blur-md shadow-lg shadow-black/30">
               <Sparkles className="w-3.5 h-3.5 text-kalyal-gold animate-pulse" />
-              <span>United Kingdom Road Haulage Fleet</span>
+              <span>UK Road Freight & Logistics Services</span>
             </div>
 
             {/* Strict rule: No duplicate logo here, pure high-impact typography */}
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.1] mb-4 drop-shadow-md">
-              Reliable Road Freight, <br />
-              <span className="text-gold-gradient">From Collection</span> <br className="hidden sm:inline" />
-              to Delivery.
+              Road Freight Transport & <br />
+              <span className="text-gold-gradient">Delivery Support</span> <br className="hidden sm:inline" />
+              Across the UK.
             </h1>
 
             <p className="text-sm sm:text-base lg:text-lg text-slate-200 leading-relaxed mb-6 max-w-xl drop-shadow">
-              Specialized UK freight transport by road. Operating dependable heavy haulage, scheduled motorway linehauls, and container logistics with dedicated operational precision.
+              Explore practical road freight transport and delivery coordination services connecting shipping terminals, industrial manufacturers, and regional distribution centers.
             </p>
 
-            {/* Primary & Secondary Action CTAs */}
+            {/* Primary & Secondary Action CTAs per Master Plan */}
             <div className="flex flex-wrap items-center gap-3.5">
-              <button
-                onClick={onOpenQuote}
-                className="px-6 py-3.5 rounded-xl font-bold text-xs sm:text-sm text-kalyal-darker bg-gradient-to-r from-amber-400 via-kalyal-gold to-amber-500 hover:from-amber-300 hover:to-amber-400 shadow-xl shadow-kalyal-gold/20 hover:shadow-glow-gold transition-all duration-300 flex items-center gap-2 group"
-              >
-                <span>Request a Freight Quote</span>
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </button>
-
               <a
                 href="#services"
+                className="px-6 py-3.5 rounded-xl font-bold text-xs sm:text-sm text-kalyal-darker bg-gradient-to-r from-amber-400 via-kalyal-gold to-amber-500 hover:from-amber-300 hover:to-amber-400 shadow-xl shadow-kalyal-gold/20 hover:shadow-glow-gold transition-all duration-300 flex items-center gap-2 group"
+              >
+                <span>Our Services</span>
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </a>
+
+              <a
+                href="#contact"
                 className="px-5 py-3.5 rounded-xl font-semibold text-xs sm:text-sm text-slate-100 hover:text-white bg-slate-900/80 hover:bg-slate-800/90 border border-white/20 backdrop-blur-md transition-all duration-300 flex items-center gap-2"
               >
-                <span>Explore Our Services</span>
+                <span>Contact Us</span>
               </a>
+
+              <button
+                onClick={onOpenQuote}
+                className="px-4 py-3.5 rounded-xl font-medium text-xs sm:text-sm text-amber-300 hover:text-amber-200 border border-kalyal-gold/30 hover:border-kalyal-gold/60 transition-all flex items-center gap-1.5"
+              >
+                <span>Request Quote</span>
+              </button>
             </div>
 
             {/* Quick Factual Highlights */}

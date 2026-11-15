@@ -25,7 +25,7 @@ export const AboutUs: React.FC = () => {
             </p>
 
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Our operations prioritize vehicle roadworthiness, punctual dispatch schedules, and accountable communication. By focusing on disciplined fleet coordination and cargo security, we ensure that every consignment moves smoothly from initial loading bay dispatch to final warehouse handover.
+              Our operations prioritize vehicle roadworthiness, punctual dispatch schedules, and accountable communication. By focusing on disciplined transport coordination and cargo security, we ensure that every consignment moves smoothly from initial loading bay dispatch to final warehouse handover.
             </p>
 
             {/* Core Values Grid */}

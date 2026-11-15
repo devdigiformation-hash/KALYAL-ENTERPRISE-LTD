@@ -1,12 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 
 interface UseImageSequenceOptions {
-  folder: string; // e.g. 'clip-01'
-  frameCount: number; // e.g. 42
+  folder?: string; // e.g. 'clip-01'
+  frameCount?: number; // e.g. 42
   posterUrl: string;
+  interimImageUrl?: string;
 }
 
-export const useImageSequence = ({ folder, frameCount, posterUrl }: UseImageSequenceOptions) => {
+export const useImageSequence = ({
+  folder,
+  frameCount = 1,
+  posterUrl,
+  interimImageUrl,
+}: UseImageSequenceOptions) => {
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
@@ -14,15 +20,38 @@ export const useImageSequence = ({ folder, frameCount, posterUrl }: UseImageSequ
 
   useEffect(() => {
     let isCancelled = false;
+
+    // If in interim state with a single approved neutral still:
+    if (interimImageUrl || !folder || frameCount <= 1) {
+      const singleImg = new Image();
+      singleImg.src = interimImageUrl || posterUrl;
+      singleImg.onload = () => {
+        if (isCancelled) return;
+        imagesRef.current = [singleImg];
+        setImages([singleImg]);
+        setIsLoaded(true);
+        setLoadProgress(100);
+      };
+      singleImg.onerror = () => {
+        // Fallback to posterUrl if interimImageUrl failed
+        if (posterUrl && singleImg.src !== posterUrl) {
+          singleImg.src = posterUrl;
+        }
+      };
+      return () => {
+        isCancelled = true;
+      };
+    }
+
+    // Full multi-frame cinematic playback sequence (when approved video frames are present):
     const loadedImages: HTMLImageElement[] = new Array(frameCount);
     let loadedCount = 0;
 
-    // Detect WebP support quickly
     const testCanvas = document.createElement('canvas');
     const isWebpSupported = testCanvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
     const extension = isWebpSupported ? 'webp' : 'jpg';
 
-    // 1. Immediately load the first frame & poster
+    // 1. Immediately load the first frame
     const firstImg = new Image();
     firstImg.src = `/sequences/${folder}/frame-001.${extension}`;
     firstImg.onload = () => {
@@ -30,16 +59,14 @@ export const useImageSequence = ({ folder, frameCount, posterUrl }: UseImageSequ
       loadedImages[0] = firstImg;
       loadedCount++;
       setLoadProgress(Math.round((loadedCount / frameCount) * 100));
-      // First frame ready
       imagesRef.current = loadedImages;
       setImages([...loadedImages]);
     };
     firstImg.onerror = () => {
-      // Fallback to jpg if webp failed
       firstImg.src = `/sequences/${folder}/frame-001.jpg`;
     };
 
-    // 2. Preload the remaining frames progressively
+    // 2. Preload remaining frames
     for (let i = 1; i < frameCount; i++) {
       const img = new Image();
       const frameNum = String(i + 1).padStart(3, '0');
@@ -56,7 +83,6 @@ export const useImageSequence = ({ folder, frameCount, posterUrl }: UseImageSequ
         }
       };
       img.onerror = () => {
-        // Fallback to jpg
         img.src = `/sequences/${folder}/frame-${frameNum}.jpg`;
       };
     }
@@ -64,7 +90,7 @@ export const useImageSequence = ({ folder, frameCount, posterUrl }: UseImageSequ
     return () => {
       isCancelled = true;
     };
-  }, [folder, frameCount]);
+  }, [folder, frameCount, posterUrl, interimImageUrl]);
 
   return { images, isLoaded, loadProgress, posterUrl };
 };
