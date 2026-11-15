@@ -10,80 +10,143 @@ export const HeroSequence: React.FC<HeroSequenceProps> = ({ onOpenQuote }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const activeFrameRef = useRef(0);
+  const canvasSizeRef = useRef({ width: 0, height: 0, dpr: 0 });
+  const lastDrawnImgRef = useRef<HTMLImageElement | null>(null);
 
-  const { images, posterUrl } = useImageSequence({
+  const { images, getFrame, posterUrl } = useImageSequence({
     folder: 'clip-01',
     frameCount: 38,
     posterUrl: '/posters/clip-01.jpg',
+    priority: true, // Priority load: frame 001 first, then async decode remaining frames
   });
 
-  // Render active frame to canvas with high fidelity
-  const renderFrame = useCallback((index: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d', { alpha: false });
-    if (!ctx) return;
+  // Render active frame to canvas with high fidelity and zero-clear persistence
+  const renderFrame = useCallback(
+    (index: number) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d', { alpha: false });
+      if (!ctx) return;
 
-    const img = images[index] || images[0];
-    if (!img || !img.complete) return;
+      const img = getFrame(index) || lastDrawnImgRef.current;
+      if (!img || !img.complete) return;
+      lastDrawnImgRef.current = img;
 
-    const dpr = window.devicePixelRatio || 1;
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      if (width === 0 || height === 0) return;
 
-    if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-    }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    ctx.save();
-    ctx.scale(dpr, dpr);
+      const imgRatio = img.width / img.height;
+      const canvasRatio = width / height;
 
-    // Calculate aspect ratio cover / contain based on screen width
-    // On desktop, safe cover focusing on middle-right truck & crane
-    // On mobile (<768px), contain or high-aspect fit to keep the crane & container fully visible
-    const imgRatio = img.width / img.height;
-    const canvasRatio = width / height;
+      let renderW: number, renderH: number, renderX: number, renderY: number;
 
-    let renderW: number, renderH: number, renderX: number, renderY: number;
+      if (width < 768) {
+        // Mobile: preserve full scene width and height
+        if (canvasRatio > imgRatio) {
+          renderH = height;
+          renderW = height * imgRatio;
+          renderX = (width - renderW) / 2;
+          renderY = 0;
+        } else {
+          renderW = width;
+          renderH = width / imgRatio;
+          renderX = 0;
+          renderY = (height - renderH) / 2;
+        }
 
-    if (width < 768) {
-      // Mobile: preserve full scene with slight margin
-      if (canvasRatio > imgRatio) {
-        renderH = height;
-        renderW = height * imgRatio;
-        renderX = (width - renderW) / 2;
-        renderY = 0;
+        // Fill letterbox margins ONLY if they exist, never clearing active image area
+        ctx.fillStyle = '#050d1a';
+        if (renderY > 0) {
+          ctx.fillRect(0, 0, width, renderY);
+          ctx.fillRect(0, renderY + renderH, width, height - (renderY + renderH));
+        }
+        if (renderX > 0) {
+          ctx.fillRect(0, 0, renderX, height);
+          ctx.fillRect(renderX + renderW, 0, width - (renderX + renderW), height);
+        }
       } else {
-        renderW = width;
-        renderH = width / imgRatio;
-        renderX = 0;
-        renderY = (height - renderH) / 2;
+        // Desktop: cinematic cover alignment
+        if (canvasRatio > imgRatio) {
+          renderW = width;
+          renderH = width / imgRatio;
+          renderX = 0;
+          renderY = (height - renderH) / 2;
+        } else {
+          renderH = height;
+          renderW = height * imgRatio;
+          renderX = (width - renderW) / 2;
+          renderY = 0;
+        }
       }
-      // Fill canvas background
-      ctx.fillStyle = '#050d1a';
-      ctx.fillRect(0, 0, width, height);
-    } else {
-      // Desktop: cinematic cover with subtle alignment
-      if (canvasRatio > imgRatio) {
-        renderW = width;
-        renderH = width / imgRatio;
-        renderX = 0;
-        renderY = (height - renderH) / 2;
-      } else {
-        renderH = height;
-        renderW = height * imgRatio;
-        renderX = (width - renderW) / 2;
-        renderY = 0;
-      }
-    }
 
-    ctx.drawImage(img, renderX, renderY, renderW, renderH);
-    ctx.restore();
-  }, [images]);
+      // Draw image directly over previous frame without blank canvas clearing
+      ctx.drawImage(img, renderX, renderY, renderW, renderH);
+    },
+    [getFrame]
+  );
 
-  // Handle scroll progress internally without exposing debug metadata
+  // Decoupled canvas buffer resizing: runs ONLY on resize/orientation change, never on scroll ticks
   useEffect(() => {
+    const updateCanvasBuffer = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      if (width === 0 || height === 0) return;
+
+      if (
+        canvasSizeRef.current.width !== width ||
+        canvasSizeRef.current.height !== height ||
+        canvasSizeRef.current.dpr !== dpr
+      ) {
+        canvasSizeRef.current = { width, height, dpr };
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+
+        // Immediately redraw current active frame so canvas is never transparent or blank
+        renderFrame(activeFrameRef.current);
+      }
+    };
+
+    updateCanvasBuffer();
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && canvasRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        updateCanvasBuffer();
+      });
+      resizeObserver.observe(canvasRef.current);
+    }
+
+    window.addEventListener('resize', updateCanvasBuffer);
+    window.addEventListener('orientationchange', updateCanvasBuffer);
+
+    return () => {
+      window.removeEventListener('resize', updateCanvasBuffer);
+      window.removeEventListener('orientationchange', updateCanvasBuffer);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
+  }, [renderFrame]);
+
+  // Handle scroll progress internally with measured header compensation
+  useEffect(() => {
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      // Paint initial frame and skip scroll animation loop
+      renderFrame(0);
+      return;
+    }
+
     let animationFrameId: number;
 
     const handleScroll = () => {
@@ -92,17 +155,20 @@ export const HeroSequence: React.FC<HeroSequenceProps> = ({ onOpenQuote }) => {
       const containerHeight = containerRef.current.offsetHeight;
       const windowHeight = window.innerHeight;
 
-      // When the top of container enters viewport, progress goes 0 -> 1
+      // Compensate for real sticky header height
+      const headerOffset =
+        parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue('--header-height')
+        ) || 80;
+
       const scrollableDistance = containerHeight - windowHeight;
       if (scrollableDistance <= 0) return;
 
-      const rawProgress = -rect.top / scrollableDistance;
+      // Pinned track scrubbing progress 0 -> 1 aligned below header
+      const rawProgress = (headerOffset - rect.top) / scrollableDistance;
       const clampedProgress = Math.max(0, Math.min(1, rawProgress));
 
-      const targetFrame = Math.min(
-        Math.round(clampedProgress * 37),
-        37
-      );
+      const targetFrame = Math.min(Math.round(clampedProgress * 37), 37);
 
       if (targetFrame !== activeFrameRef.current) {
         activeFrameRef.current = targetFrame;
@@ -121,10 +187,10 @@ export const HeroSequence: React.FC<HeroSequenceProps> = ({ onOpenQuote }) => {
     };
   }, [renderFrame]);
 
-  // Initial paint when first image is loaded
+  // Initial paint when frame 0 is decoded and available
   useEffect(() => {
-    if (images[0]) {
-      renderFrame(0);
+    if (images.length > 0) {
+      renderFrame(activeFrameRef.current);
     }
   }, [images, renderFrame]);
 
@@ -133,16 +199,16 @@ export const HeroSequence: React.FC<HeroSequenceProps> = ({ onOpenQuote }) => {
       id="hero"
       ref={containerRef} 
       className="relative w-full bg-kalyal-darker"
-      style={{ height: '240vh' }} // Ample scroll room to scrub all 42 frames smoothly
+      style={{ height: '240vh' }} // Ample scroll room to scrub all 38 frames smoothly
     >
       {/* Sticky viewport frame pinned dynamically below header */}
       <div className="sticky top-[var(--header-height,80px)] h-[calc(100svh-var(--header-height,80px))] w-full overflow-hidden flex flex-col justify-between">
         
         {/* Background Canvas Rendering Sequence */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 bg-[#050d1a]">
           <canvas 
             ref={canvasRef} 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover block"
             aria-label="KALYAL ENTERPRISE LTD road freight container dispatch scroll animation"
           />
 

@@ -18,7 +18,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenQuote }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Dynamically measure and broadcast real header height for pinned animation stages
+  // Dynamically measure and broadcast real header height using ResizeObserver
   useEffect(() => {
     const updateHeaderHeight = () => {
       if (headerRef.current) {
@@ -26,9 +26,24 @@ export const Header: React.FC<HeaderProps> = ({ onOpenQuote }) => {
         document.documentElement.style.setProperty('--header-height', `${height}px`);
       }
     };
+
     updateHeaderHeight();
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && headerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        updateHeaderHeight();
+      });
+      resizeObserver.observe(headerRef.current);
+    }
+
     window.addEventListener('resize', updateHeaderHeight);
-    return () => window.removeEventListener('resize', updateHeaderHeight);
+    return () => {
+      window.removeEventListener('resize', updateHeaderHeight);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
   }, []);
 
   const navLinks = [
@@ -87,7 +102,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenQuote }) => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
           
-          {/* Top-Left Approved Full-Resolution Brand Logo ONLY (Strict Rule: No duplicate next to hero heading) */}
+          {/* Top-Left Approved Full-Resolution Brand Logo ONLY (Curved corners rounded-2xl preserved) */}
           <a href="#hero" className="flex items-center group focus:outline-none shrink-0" aria-label="KALYAL ENTERPRISE LTD Home">
             <img 
               src="/brand/logo.png" 
@@ -102,82 +117,84 @@ export const Header: React.FC<HeaderProps> = ({ onOpenQuote }) => {
               <a
                 key={link.name}
                 href={link.href}
-                className="text-sm font-medium text-slate-300 hover:text-kalyal-gold transition-colors relative py-1 group"
+                className="text-sm font-medium text-slate-200 hover:text-kalyal-gold transition-colors tracking-wide"
               >
                 {link.name}
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-kalyal-gold transition-all duration-300 group-hover:w-full" />
               </a>
             ))}
           </nav>
 
-          {/* Action CTAs */}
-          <div className="hidden sm:flex items-center space-x-3 shrink-0">
-            <a 
-              href="tel:+447746645195" 
-              className="px-3.5 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 rounded-lg border border-slate-700 transition-all flex items-center gap-2"
+          {/* Desktop CTA & Telephone Button */}
+          <div className="hidden lg:flex items-center space-x-4">
+            <a
+              href="tel:+447746645195"
+              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-200 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all flex items-center gap-2"
             >
               <Phone className="w-3.5 h-3.5 text-kalyal-gold" />
-              Call Dispatch
+              <span>07746 645195</span>
             </a>
-            
+
             <button
               onClick={onOpenQuote}
-              className="px-4 py-2 text-xs font-bold text-kalyal-darker bg-gradient-to-r from-amber-400 via-kalyal-gold to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-lg shadow-md hover:shadow-glow-gold transition-all duration-300 flex items-center gap-1.5"
+              className="px-5 py-2.5 rounded-xl font-bold text-xs text-kalyal-darker bg-gradient-to-r from-amber-400 via-kalyal-gold to-amber-500 hover:from-amber-300 hover:to-amber-400 shadow-md shadow-kalyal-gold/20 hover:shadow-glow-gold transition-all duration-300 flex items-center gap-1.5"
             >
-              <span>Request Quote</span>
+              <span>Get Freight Quote</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          {/* Mobile Hamburger Toggle */}
-          <div className="flex items-center space-x-2 lg:hidden">
+          {/* Mobile Menu Toggle Button */}
+          <div className="flex lg:hidden items-center gap-2">
             <button
               onClick={onOpenQuote}
-              className="px-3 py-1.5 text-xs font-bold text-kalyal-darker bg-kalyal-gold rounded-md sm:hidden"
+              className="px-3 py-1.5 rounded-lg text-xs font-bold text-kalyal-darker bg-gradient-to-r from-amber-400 to-kalyal-gold"
             >
               Quote
             </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-slate-300 hover:text-white focus:outline-none"
-              aria-label="Toggle menu"
+              className="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 focus:outline-none"
+              aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
+
         </div>
 
         {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-kalyal-dark/98 backdrop-blur-xl border-b border-white/10 px-4 pt-4 pb-6 space-y-3">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="block px-3 py-2 text-base font-medium text-slate-200 hover:text-kalyal-gold hover:bg-slate-800/60 rounded-lg transition-colors"
-              >
-                {link.name}
-              </a>
-            ))}
-            <div className="pt-4 border-t border-white/10 space-y-2">
-              <a
-                href="tel:+447746645195"
-                className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold text-slate-200 bg-slate-800/80 rounded-lg"
-              >
-                <Phone className="w-4 h-4 text-kalyal-gold" />
-                +44 7746 645195
-              </a>
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenQuote();
-                }}
-                className="w-full py-2.5 text-sm font-bold text-kalyal-darker bg-gradient-to-r from-amber-400 to-kalyal-gold rounded-lg shadow-md"
-              >
-                Request a Freight Quote
-              </button>
-            </div>
+          <div className="lg:hidden bg-kalyal-dark/98 backdrop-blur-xl border-b border-white/10 px-4 pt-3 pb-6 animate-fadeIn">
+            <nav className="flex flex-col space-y-3">
+              {navLinks.map((link) => (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-200 hover:text-kalyal-gold hover:bg-white/5 transition-colors"
+                >
+                  {link.name}
+                </a>
+              ))}
+              <div className="pt-4 flex flex-col gap-3">
+                <a
+                  href="tel:+447746645195"
+                  className="w-full px-4 py-2.5 rounded-xl text-sm font-semibold text-center text-slate-200 bg-white/5 border border-white/10 flex items-center justify-center gap-2"
+                >
+                  <Phone className="w-4 h-4 text-kalyal-gold" />
+                  <span>Call Dispatch: +44 7746 645195</span>
+                </a>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenQuote();
+                  }}
+                  className="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-center text-kalyal-darker bg-gradient-to-r from-amber-400 via-kalyal-gold to-amber-500"
+                >
+                  Request Freight Quote
+                </button>
+              </div>
+            </nav>
           </div>
         )}
       </header>
