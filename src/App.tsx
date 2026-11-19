@@ -24,7 +24,7 @@ export const App: React.FC = () => {
       {/* Main Content Sections */}
       <main className="flex-1">
         
-        {/* SECTION 01: Full-Viewport Opening Hero — Container Loading (VIDEO_01, 38 frames) */}
+        {/* SECTION 01: Full-Viewport Opening Hero — Container Loading (VIDEO_01, 40 frames) */}
         <HeroSequence onOpenQuote={() => setQuoteOpen(true)} />
 
         {/* SECTION 02: Zigzag 1 — Road Freight Delivery (VIDEO_02, Visual Right) */}

@@ -15,7 +15,7 @@ export const HeroSequence: React.FC<HeroSequenceProps> = ({ onOpenQuote }) => {
 
   const { images, getFrame, posterUrl } = useImageSequence({
     folder: 'clip-01',
-    frameCount: 38,
+    frameCount: 40,
     posterUrl: '/posters/clip-01.jpg',
     priority: true, // Priority load: frame 001 first, then async decode remaining frames
   });
@@ -168,7 +168,7 @@ export const HeroSequence: React.FC<HeroSequenceProps> = ({ onOpenQuote }) => {
       const rawProgress = (headerOffset - rect.top) / scrollableDistance;
       const clampedProgress = Math.max(0, Math.min(1, rawProgress));
 
-      const targetFrame = Math.min(Math.round(clampedProgress * 37), 37);
+      const targetFrame = Math.min(Math.round(clampedProgress * 39), 39);
 
       if (targetFrame !== activeFrameRef.current) {
         activeFrameRef.current = targetFrame;
@@ -199,7 +199,7 @@ export const HeroSequence: React.FC<HeroSequenceProps> = ({ onOpenQuote }) => {
       id="hero"
       ref={containerRef} 
       className="relative w-full bg-kalyal-darker"
-      style={{ height: '240vh' }} // Ample scroll room to scrub all 38 frames smoothly
+      style={{ height: '240vh' }} // Ample scroll room to scrub all 40 frames smoothly
     >
       {/* Sticky viewport frame pinned dynamically below header */}
       <div className="sticky top-[var(--header-height,80px)] h-[calc(100svh-var(--header-height,80px))] w-full overflow-hidden flex flex-col justify-between">
