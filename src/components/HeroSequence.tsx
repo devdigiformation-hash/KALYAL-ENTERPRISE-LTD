@@ -199,7 +199,7 @@ export const HeroSequence: React.FC<HeroSequenceProps> = ({ onOpenQuote }) => {
       id="hero"
       ref={containerRef} 
       className="relative w-full bg-kalyal-darker"
-      style={{ height: '240vh' }} // Ample scroll room to scrub all 40 frames smoothly
+      style={{ height: '240vh' }} // Ample scroll room to scrub all 38 frames smoothly
     >
       {/* Sticky viewport frame pinned dynamically below header */}
       <div className="sticky top-[var(--header-height,80px)] h-[calc(100svh-var(--header-height,80px))] w-full overflow-hidden flex flex-col justify-between">
